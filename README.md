@@ -12,6 +12,7 @@
 Quentin :
 
 - Add to favorites
+- Add Layout, Header, Footer, Router
 
 Noah :
 
