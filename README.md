@@ -13,10 +13,9 @@ Quentin :
 
 - Add to favorites
 - Add Layout, Header, Footer, Router
+- Show all movie and add favorite button
 
 Noah :
-
-- show all movies
 
 Marty :
 

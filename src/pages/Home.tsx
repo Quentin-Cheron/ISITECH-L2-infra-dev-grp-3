@@ -1,118 +1,130 @@
-import { addFavorite, removeFavorite } from "../utils/favorite";
+import { useEffect, useState } from "react";
+import { getAllMovies } from "../utils/api";
+import {
+  addFavorite,
+  getFavoriteItems,
+  removeFavorite,
+} from "../utils/favorite";
+import { Movies } from "../../types/movies";
 
-const posts = [
-  {
-    id: 1,
-    title: "Boost your conversion rate",
-    href: "#",
-    description:
-      "Illo sint voluptas. Error voluptates culpa eligendi. Hic vel totam vitae illo. Non aliquid explicabo necessitatibus unde. Sed exercitationem placeat consectetur nulla deserunt vel. Iusto corrupti dicta.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1496128858413-b36217c2ce36?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=3603&q=80",
-    date: "Mar 16, 2020",
-    datetime: "2020-03-16",
-    category: { title: "Marketing", href: "#" },
-    author: {
-      name: "Michael Foster",
-      role: "Co-Founder / CTO",
-      href: "#",
-      imageUrl:
-        "https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-    },
-  },
-];
+function Home() {
+  const [movies, setMovies] = useState<Movies[]>([]);
+  const [favoriteMovies, setFavoriteMovies] = useState<Movies[]>([]);
 
-export default function Home() {
+  useEffect(() => {
+    getAllMovies().then((data) => setMovies(data.results));
+    setFavoriteMovies(getFavoriteItems());
+  }, []);
+
+  const handleFavoriteToggle = (movie: Movies) => {
+    if (favoriteMovies.some((fav) => fav.id === movie.id)) {
+      removeFavorite(movie.id);
+    } else {
+      addFavorite({
+        id: movie.id,
+        original_title: movie.original_title,
+        overview: movie.overview,
+        release_date: movie.release_date,
+        vote_average: movie.vote_average,
+        vote_count: movie.vote_count,
+        poster_path: movie.poster_path,
+        genre_ids: movie.genre_ids,
+        is_favorite: true,
+      });
+    }
+    setFavoriteMovies(getFavoriteItems());
+  };
+
   return (
     <div className="bg-white py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-            From the blog
+            Tous les films
           </h2>
-          <p className="mt-2 text-lg leading-8 text-gray-600">
-            Learn how to grow your business with our expert advice.
-          </p>
         </div>
         <div className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-20 lg:mx-0 lg:max-w-none lg:grid-cols-3">
-          {posts.map((post) => (
-            <article
-              key={post.id}
-              className="flex flex-col items-start justify-between"
-            >
-              <div className="relative w-full">
-                <img
-                  alt=""
-                  src={post.imageUrl}
-                  className="aspect-[16/9] w-full rounded-2xl bg-gray-100 object-cover sm:aspect-[2/1] lg:aspect-[3/2]"
-                />
-                <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-gray-900/10" />
-              </div>
-              <div className="max-w-xl">
-                <div className="mt-8 flex items-center gap-x-4 text-xs">
-                  <time dateTime={post.datetime} className="text-gray-500">
-                    {post.date}
-                  </time>
-                  <a
-                    href={post.category.href}
-                    className="relative z-10 rounded-full bg-gray-50 px-3 py-1.5 font-medium text-gray-600 hover:bg-gray-100"
-                  >
-                    {post.category.title}
-                  </a>
-                </div>
-                <div className="group relative">
-                  <h3 className="mt-3 text-lg font-semibold leading-6 text-gray-900 group-hover:text-gray-600">
-                    <a href={post.href}>
-                      <span className="absolute inset-0" />
-                      {post.title}{" "}
-                      <button
-                        className="relative z-10 rounded-full bg-gray-50 px-3 py-1.5 font-medium text-gray-600 hover:bg-gray-100"
-                        onClick={() =>
-                          addFavorite(post.id, {
-                            id: post.id,
-                            title: post.title,
-                            href: post.href,
-                            date: post.date,
-                            imageUrl: post.imageUrl,
-                            category: post.category,
-                          })
-                        }
-                      >
-                        Ajouter aux favoris
-                      </button>
-                      <button
-                        className="relative z-10 rounded-full bg-gray-50 px-3 py-1.5 font-medium text-gray-600 hover:bg-gray-100"
-                        onClick={() => removeFavorite(post.id)}
-                      >
-                        Supprimer des favoris
-                      </button>
-                    </a>
-                  </h3>
-                  <p className="mt-5 line-clamp-3 text-sm leading-6 text-gray-600">
-                    {post.description}
-                  </p>
-                </div>
-                <div className="relative mt-8 flex items-center gap-x-4">
+          {movies.map((post) => {
+            const isFavorite = favoriteMovies.some((fav) => fav.id === post.id);
+
+            return (
+              <article
+                key={post.id}
+                className="flex flex-col items-start justify-between relative"
+              >
+                <button
+                  className="absolute z-10 right-4 top-4"
+                  onClick={() => handleFavoriteToggle(post)}
+                >
+                  {isFavorite ? (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="yellow"
+                      className="size-6"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  ) : (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="yellow"
+                      className="size-6"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"
+                      />
+                    </svg>
+                  )}
+                </button>
+                <div className="relative w-full">
                   <img
-                    alt=""
-                    src={post.author.imageUrl}
-                    className="h-10 w-10 rounded-full bg-gray-100"
+                    alt={post.original_title}
+                    src={`https://image.tmdb.org/t/p/w500${post.poster_path}`}
+                    className="aspect-[16/9] w-full rounded-2xl bg-gray-100 object-cover sm:aspect-[2/1] lg:aspect-[3/2]"
                   />
-                  <div className="text-sm leading-6">
-                    <p className="font-semibold text-gray-900">
-                      <a href={post.author.href}>
+                  <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-gray-900/10" />
+                </div>
+                <div className="max-w-xl">
+                  <div className="mt-8 flex items-center gap-x-4 text-xs">
+                    <time
+                      dateTime={post.release_date}
+                      className="text-gray-500"
+                    >
+                      {post.release_date}
+                    </time>
+                    <span className="relative z-10 rounded-full bg-gray-50 px-3 py-1.5 font-medium text-gray-600 hover:bg-gray-100">
+                      {post.genre_ids[0]}
+                    </span>
+                  </div>
+                  <div className="group relative">
+                    <h3 className="mt-3 text-lg font-semibold leading-6 text-gray-900 group-hover:text-gray-600">
+                      <a href="#">
                         <span className="absolute inset-0" />
-                        {post.author.name}
+                        {post.original_title}
                       </a>
+                    </h3>
+                    <p className="mt-5 line-clamp-3 text-sm leading-6 text-gray-600">
+                      {post.overview}
                     </p>
-                    <p className="text-gray-600">{post.author.role}</p>
                   </div>
                 </div>
-              </div>
-            </article>
-          ))}
+              </article>
+            );
+          })}
         </div>
       </div>
     </div>
   );
 }
+
+export default Home;
