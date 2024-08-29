@@ -1,1 +1,9 @@
-export default function Home() {}
+import Filter from "../components/Filter";
+
+export default function Home() {
+  return (
+    <>
+      <Filter />
+    </>
+  );
+}
